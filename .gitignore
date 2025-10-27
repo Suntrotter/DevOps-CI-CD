@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*.sqlite3
+
+# Django
+/staticfiles/
+media/
+
+# Env
+.env
+
+# VS Code / IDE
+.vscode/
+.idea/
+
+# Byte-compiled
+*.pyc
+
+# Docker
+*.log
+
+# Root ignores
+.vscode/
+Desktop/
