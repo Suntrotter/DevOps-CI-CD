@@ -1,0 +1,32 @@
+# === TERRAFORM ===
+.terraform/
+**/.terraform/
+terraform.tfstate
+terraform.tfstate.*
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+modules/*/terraform.lock.hcl
+
+# === LOCAL ENV FILES ===
+*.env
+*.tfvars
+*.tfvars.json
+
+# === OS / EDITOR JUNK ===
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.idea/
+.vscode/
+*.log
+__pycache__/
+*.bak
+*.tmp
+
+# === BACKUPS ===
+*.backup
+*.old

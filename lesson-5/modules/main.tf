@@ -1,36 +1,39 @@
 terraform {
   required_version = ">= 1.6.0"
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = ">= 5.0"
+      version = "~> 5.0"
     }
   }
 }
 
 provider "aws" {
-  region = "us-west-2"
+  region = var.region
 }
 
+# S3 + DynamoDB 
 module "s3_backend" {
-  source           = "./s3-backend"
-  bucket_name      = "my-awesome-lesson5-bucket"
-  table_name       = "terraform-locks"
-  create_resources = false
+  source            = "./modules/s3-backend"
+  bucket_name       = var.bucket_name
+  table_name        = var.table_name
+  create_resources  = var.create_backend_resources
 }
 
-
+# VPC
 module "vpc" {
-  source             = "./vpc"
-  vpc_cidr_block     = "10.0.0.0/16"
-  public_subnets     = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
-  private_subnets    = ["10.0.4.0/24", "10.0.5.0/24", "10.0.6.0/24"]
-  availability_zones = ["us-west-2a", "us-west-2b", "us-west-2c"]
+  source             = "./modules/vpc"
+  vpc_cidr_block     = var.vpc_cidr_block
+  public_subnets     = var.public_subnets
+  private_subnets    = var.private_subnets
+  availability_zones = var.availability_zones
   vpc_name           = "lesson-5-vpc"
 }
 
+# ECR 
 module "ecr" {
-  source       = "./s3-backend/ecr"
-  ecr_name     = "lesson-5-ecr"
+  source       = "./modules/ecr"
+  ecr_name     = var.ecr_name
   scan_on_push = true
 }
