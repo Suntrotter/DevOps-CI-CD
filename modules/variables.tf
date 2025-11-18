@@ -1,6 +1,6 @@
 variable "region" {
   type    = string
-  default = "us-west-2"
+  default = "eu-north-1"
 }
 
 # Backend names 
