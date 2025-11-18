@@ -1,0 +1,7 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Repository
+metadata:
+  name: django-helm-repo
+  namespace: argocd
+spec:
+  url: {{ (index .Values.applications 0).repoURL | quote }}

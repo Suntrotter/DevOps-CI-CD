@@ -10,8 +10,10 @@ terraform {
 }
 
 provider "aws" {
-  region = var.region
+  region = var.aws_region
 }
+
+
 
 # S3 + DynamoDB 
 module "s3_backend" {
@@ -37,3 +39,33 @@ module "ecr" {
   ecr_name     = var.ecr_name
   scan_on_push = true
 }
+
+############################
+# Jenkins (модуль з modules/jenkins)
+############################
+module "jenkins" {
+  source = "./modules/jenkins"
+
+  cluster_name     = module.eks.cluster_name
+  region           = var.aws_region
+  namespace        = "jenkins"
+
+  cluster_endpoint = module.eks.cluster_endpoint
+  cluster_ca_cert  = module.eks.cluster_ca_cert
+  token            = module.eks.token
+}
+
+module "argo_cd" {
+  source = "./modules/argo_cd"
+
+  cluster_name     = module.eks.cluster_name
+  region           = var.aws_region      
+  cluster_endpoint = module.eks.cluster_endpoint
+  cluster_ca_cert  = module.eks.cluster_ca_cert
+
+  namespace        = "argocd"
+  chart_version    = "7.6.9"
+}
+
+
+

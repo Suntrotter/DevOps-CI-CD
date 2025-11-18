@@ -1,0 +1,101 @@
+pipeline {
+    agent {
+        kubernetes {
+            yaml """
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    jenkins: kaniko-agent
+spec:
+  serviceAccountName: jenkins-sa
+  containers:
+    - name: kaniko
+      image: gcr.io/kaniko-project/executor:latest
+      command:
+        - cat
+      tty: true
+      volumeMounts:
+        - name: jenkins-docker-config
+          mountPath: /kaniko/.docker
+    - name: git
+      image: alpine/git:latest
+      command: ['cat']
+      tty: true
+  volumes:
+    - name: jenkins-docker-config
+      emptyDir: {}
+"""
+        }
+    }
+
+    environment {
+        AWS_DEFAULT_REGION = 'eu-north-1'
+
+        ECR_REGISTRY   = '419707450093.dkr.ecr.eu-north-1.amazonaws.com'
+        ECR_REPOSITORY = 'lesson-7-django-ecr'
+
+        IMAGE_TAG      = "${env.BUILD_NUMBER}"
+
+        HELM_REPO_GIT_URL  = 'git@github.com:YOUR_USER/django-helm-repo.git'
+        HELM_REPO_DIR      = 'django-helm-repo'
+        HELM_CHART_PATH    = 'charts/django-app'
+    }
+
+    options {
+        timestamps()
+    }
+
+    stages {
+        stage('Checkout application repo') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Build & Push image with Kaniko') {
+            steps {
+                container('kaniko') {
+                    sh """
+                    /kaniko/executor \
+                      --context $WORKSPACE \
+                      --dockerfile Dockerfile \
+                      --destination $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
+                      --destination $ECR_REGISTRY/$ECR_REPOSITORY:latest
+                    """
+                }
+            }
+        }
+
+        stage('Update Helm values in separate repo') {
+            steps {
+                container('git') {
+                    sshagent(credentials: ['git-ssh-key']) {
+                        sh """
+                        rm -rf $HELM_REPO_DIR
+                        git clone $HELM_REPO_GIT_URL $HELM_REPO_DIR
+                        cd $HELM_REPO_DIR/$HELM_CHART_PATH
+
+                        # Простая замена строки tag: ... на новый тег
+                        sed -i 's/^  tag: .*/  tag: "$IMAGE_TAG"/' values.yaml
+
+                        git config user.name "jenkins-bot"
+                        git config user.email "jenkins-bot@example.com"
+                        git commit -am "Update django image tag to $IMAGE_TAG" || echo "Nothing to commit"
+                        git push origin main
+                        """
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "Image pushed to $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG and Helm values updated."
+        }
+        failure {
+            echo "Pipeline failed, see logs."
+        }
+    }
+}

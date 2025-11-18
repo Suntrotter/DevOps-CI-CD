@@ -1,0 +1,7 @@
+applications:
+  - name: django-app
+    namespace: django
+    project: default
+    repoURL: "https://github.com/YOUR_USER/django-helm-repo.git"
+    targetRevision: "main"
+    path: "charts/django-app"

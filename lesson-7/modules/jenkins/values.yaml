@@ -1,0 +1,22 @@
+controller:
+  admin:
+    username: admin
+    password: admin
+  installPlugins: []
+  jenkinsUrl: "http://jenkins.jenkins.svc.cluster.local:8080"
+  serviceType: LoadBalancer
+  servicePort: 8080
+  resources:
+    requests:
+      cpu: "200m"
+      memory: "512Mi"
+    limits:
+      cpu: "1"
+      memory: "2Gi"
+
+serviceAccount:
+  create: true
+  name: jenkins-sa
+
+persistence:
+  enabled: false
