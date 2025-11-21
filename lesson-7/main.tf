@@ -82,5 +82,29 @@ module "argo_cd" {
   chart_version = "7.6.9"
 }
 
+module "rds" {
+  source = "./modules/rds"
+
+  name_prefix = "devops-ci-cd-db"
+
+  vpc_id     = module.vpc.vpc_id
+  subnet_ids = module.vpc.private_subnets   
+
+  allowed_cidr_blocks = [module.vpc.vpc_cidr] 
+
+  use_aurora = false
+
+  engine               = "postgres"
+  engine_version       = "14.9"
+  parameter_group_family = "postgres14"
+  instance_class       = "db.t3.micro"
+  allocated_storage    = 20
+  multi_az             = false
+
+  db_name  = "appdb"
+  username = "appuser"
+  password = "ChangeMe123!@"  
+}
+
 
 
