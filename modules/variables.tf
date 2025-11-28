@@ -19,3 +19,23 @@ variable "availability_zones" { type = list(string) default = ["us-west-2a","us-
 
 # ECR
 variable "ecr_name" { type = string default = "lesson-5-ecr" }
+
+variable "cluster_name" {
+  type        = string
+  description = "EKS cluster name"
+  default     = "lesson-eks-cluster"
+}
+
+variable "project_name" {
+  type        = string
+  description = "Project name used for EKS and related resources"
+  default     = "devops-final"
+}
+
+variable "db_password" {
+  type        = string
+  description = "Master password for RDS/Aurora"
+  sensitive   = true
+}
+
+

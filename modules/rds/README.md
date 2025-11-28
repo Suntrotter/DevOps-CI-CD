@@ -41,3 +41,30 @@ module "rds" {
 
   port = 5432
 }
+
+## 2. Aurora PostgreSQL
+
+module "rds" {
+  source = "./modules/rds"
+
+  name_prefix = "devops-ci-cd-db"
+
+  vpc_id     = module.vpc.vpc_id
+  subnet_ids = module.vpc.private_subnets
+
+  allowed_cidr_blocks = [module.vpc.vpc_cidr]
+
+  use_aurora = true
+
+  engine                 = "aurora-postgresql"
+  engine_version         = "14.6"
+  parameter_group_family = "aurora-postgresql14"
+  instance_class         = "db.t3.medium"
+
+  db_name  = "appdb"
+  username = "appuser"
+  password = "ChangeMe123!@"
+
+  port = 5432
+}
+
